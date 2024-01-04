@@ -117,7 +117,7 @@ class Service extends Facade
 }
 ```
 
-If the underlying class uses `ForwardsCalls`, add a `@mixin` annotation to the underyling class so it is picked up by the documenter:
+If the underlying class forwards calls to another class, add a `@mixin` annotation to the underlying class so it is picked up by the documenter:
 
 ```php
 namespace App\Facades;
@@ -139,11 +139,15 @@ class Service extends Facade
 ```php
 namespace App\Services;
 
+use Illuminate\Support\Traits\ForwardsCalls;
+
 /**
  * @mixin \App\Services\SomeClass
  */
 class ServiceManager
 {
+    use ForwardsCalls;
+    
     // ...
 }
 ```
