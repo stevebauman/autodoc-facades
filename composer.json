@@ -16,10 +16,6 @@
             "/bootstrap/"
         ]
     },
-    "dist": {
-        "url": "https://raw.githubusercontent.com/stevebauman/autodoc-facade/master/builds/autodoc",
-        "type": "file"
-    },
     "authors": [
         {
             "name": "Steve Bauman",
@@ -58,7 +54,7 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "bin": ["autodoc"],
+    "bin": ["builds/autodoc"],
     "repositories": {
         "facade-documenter": {
             "type": "vcs",
