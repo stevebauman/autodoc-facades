@@ -99,7 +99,9 @@ class GenerateFacadeDocs extends Command
 
 ### Getting started
 
-To begin, your facades must contain an `@see` annotation with the **fully-qualified namespace**. It will not resolve imported classnames.
+To begin, your facades must contain an `@see` annotation with the **fully-qualified namespace**.
+
+It will not resolve short-name classnames of classes that were imported.
 
 For example, **this will not work**:
 
