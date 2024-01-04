@@ -114,7 +114,7 @@ class Service extends Facade
 }
 ```
 
-```class
+```php
 namespace App\Services;
 
 /**
