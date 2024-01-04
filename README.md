@@ -63,7 +63,13 @@ class Service extends Facade
 
 ## Installation
 
-Install via composer:
+Install globally via composer:
+
+```bash
+composer global require stevebauman/autodoc-facades
+```
+
+Or into your application (as dev):
 
 ```bash
 composer require --dev stevebauman/autodoc-facades
