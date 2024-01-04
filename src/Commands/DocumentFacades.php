@@ -7,7 +7,6 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
-use Lorisleiva\Lody\Lody;
 use Spatie\StructureDiscoverer\Discover;
 
 class DocumentFacades extends Command
