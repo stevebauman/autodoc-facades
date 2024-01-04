@@ -1,7 +1,5 @@
 <?php
 
-namespace Tests\Feature;
-
 use App\Commands\Facades;
 use Tests\Fixtures\FacadeWithSee;
 
