@@ -1,4 +1,4 @@
-name: run-tests
+name: update-facade-documenter
 
 on:
   schedule:
@@ -7,8 +7,6 @@ on:
 jobs:
   run-tests:
     runs-on: ubuntu-latest
-
-    name: ${{ matrix.os }} - P${{ matrix.php }}
 
     steps:
       - name: Checkout code
