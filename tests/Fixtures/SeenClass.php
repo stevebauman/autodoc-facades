@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Fixtures;
+namespace Stevebauman\AutodocFacades\Tests\Fixtures;
 
 class SeenClass
 {

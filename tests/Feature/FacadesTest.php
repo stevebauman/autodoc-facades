@@ -1,7 +1,7 @@
 <?php
 
-use App\Commands\Facades;
-use Tests\Fixtures\FacadeWithSee;
+use Stevebauman\AutodocFacades\Commands\DocumentFacades;
+use Stevebauman\AutodocFacades\Tests\Fixtures\FacadeWithSee;
 
 use function Pest\testDirectory;
 
@@ -9,7 +9,7 @@ beforeEach(function () {
     // Store the current state of the files in the Fixtures directory
     $this->originalFileContents = [];
 
-    foreach (glob(testDirectory('Fixtures/*')) as $file) {
+    foreach (glob(fixturePath('*')) as $file) {
         $this->originalFileContents[$file] = file_get_contents($file);
     }
 });
@@ -22,8 +22,8 @@ afterEach(function () {
 });
 
 test('it documents facades with @see annotations', function () {
-    $this->artisan(Facades::class, [
-        'paths' => testDirectory('Fixtures'),
+    $this->artisan(DocumentFacades::class, [
+        'paths' => fixturePath(),
     ]);
 
     $contents = file_get_contents(testDirectory('Fixtures/FacadeWithSee.php'));
@@ -33,8 +33,8 @@ test('it documents facades with @see annotations', function () {
 });
 
 test('it doesnt document facades when excluded', function () {
-    $this->artisan(Facades::class, [
-        'paths' => testDirectory('Fixtures'),
+    $this->artisan(DocumentFacades::class, [
+        'paths' => fixturePath(),
         '--except' => [FacadeWithSee::class],
     ]);
 
@@ -44,8 +44,8 @@ test('it doesnt document facades when excluded', function () {
 });
 
 test('it documents facades when included', function () {
-    $this->artisan(Facades::class, [
-        'paths' => testDirectory('Fixtures'),
+    $this->artisan(DocumentFacades::class, [
+        'paths' => fixturePath(),
         '--only' => [FacadeWithSee::class],
     ]);
 

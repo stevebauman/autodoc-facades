@@ -1,11 +1,11 @@
 <?php
 
-namespace Tests\Fixtures;
+namespace Stevebauman\AutodocFacades\Tests\Fixtures;
 
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \Tests\Fixtures\SeenClass
+ * @see \Stevebauman\AutodocFacades\Tests\Fixtures\SeenClass
  */
 class FacadeWithSee extends Facade
 {

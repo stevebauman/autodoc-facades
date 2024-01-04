@@ -1,10 +1,16 @@
 <?php
 
-namespace Tests;
+namespace Stevebauman\AutodocFacades\Tests;
 
-use LaravelZero\Framework\Testing\TestCase as BaseTestCase;
+use Orchestra\Testbench\TestCase as BaseTestCase;
+use Stevebauman\AutodocFacades\AutodocFacadeServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
-    use CreatesApplication;
+    protected function getPackageProviders($app)
+    {
+        return [
+            AutodocFacadeServiceProvider::class,
+        ];
+    }
 }
