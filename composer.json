@@ -1,0 +1,57 @@
+{
+    "name": "stevebauman/autodoc-facades",
+    "description": "Auto-generate PHP doc annotations for Laravel facades",
+    "keywords": ["autodoc", "document", "annotate", "facades", "facade"],
+    "homepage": "https://github.com/stevebauman",
+    "type": "project",
+    "license": "MIT",
+    "support": {
+        "issues": "https://github.com/stevebauman/autodoc-facades/issues",
+        "source": "https://github.com/stevebauman/autodoc-facades"
+    },
+    "authors": [
+        {
+            "name": "Steve Bauman",
+            "email": "steven_bauman@outlook.com"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "laravel-zero/framework": "^10.2",
+        "lorisleiva/lody": "^0.4.0",
+        "nunomaduro/termwind": "^1.15.1"
+    },
+    "require-dev": {
+        "laravel/facade-documenter": "dev-main",
+        "laravel/pint": "^1.13",
+        "mockery/mockery": "^1.6",
+        "pestphp/pest": "^2.22"
+    },
+    "autoload": {
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true
+        }
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "bin": ["autodoc"],
+    "repositories": {
+        "facade-documenter": {
+            "type": "vcs",
+            "url": "git@github.com:laravel/facade-documenter.git"
+        }
+    }
+}
