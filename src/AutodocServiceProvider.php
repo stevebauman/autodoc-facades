@@ -8,9 +8,9 @@ use Stevebauman\AutodocFacades\Commands\DocumentFacades;
 class AutodocServiceProvider extends ServiceProvider
 {
     /**
-     * Register any application services.
+     * Bootstrap any package services.
      */
-    public function register(): void
+    public function boot(): void
     {
         $this->commands(DocumentFacades::class);
     }
