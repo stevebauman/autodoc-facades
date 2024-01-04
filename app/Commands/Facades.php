@@ -2,15 +2,11 @@
 
 namespace App\Commands;
 
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
 use LaravelZero\Framework\Commands\Command;
-
-use Lorisleiva\Lody\ClassnameLazyCollection;
 use Lorisleiva\Lody\Lody;
-use function Termwind\{render};
 
 class Facades extends Command
 {
