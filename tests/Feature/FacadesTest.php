@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Commands\Facades;
 use Tests\Fixtures\FacadeWithSee;
+
 use function Pest\testDirectory;
 
 beforeEach(function () {
@@ -24,7 +25,7 @@ afterEach(function () {
 
 test('it documents facades with @see annotations', function () {
     $this->artisan(Facades::class, [
-        'paths' => testDirectory('Fixtures')
+        'paths' => testDirectory('Fixtures'),
     ]);
 
     $contents = file_get_contents(testDirectory('Fixtures/FacadeWithSee.php'));

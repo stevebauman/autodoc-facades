@@ -19,10 +19,10 @@
         "php": "^8.1",
         "laravel-zero/framework": "^10.2",
         "lorisleiva/lody": "^0.4.0",
-        "nunomaduro/termwind": "^1.15.1"
+        "nunomaduro/termwind": "^1.15.1",
+        "laravel/facade-documenter": "dev-main"
     },
     "require-dev": {
-        "laravel/facade-documenter": "dev-main",
         "laravel/pint": "^1.13",
         "mockery/mockery": "^1.6",
         "pestphp/pest": "^2.22"

@@ -47,7 +47,7 @@ class Facades extends Command
             );
         }
 
-        $result = Process::run(sprintf("php -f vendor/bin/facade.php -- %s", $facades->map(
+        $result = Process::run(sprintf('php -f vendor/bin/facade.php -- %s', $facades->map(
             fn (string $classname) => str_replace('\\', '\\\\', $classname)
         )->join(' ')));
 
