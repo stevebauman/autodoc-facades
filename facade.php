@@ -1,6 +1,6 @@
 <?php
 
-require_once $_composer_autoload_path ?? __DIR__.'/../vendor/autoload.php';
+require_once $_composer_autoload_path ?? __DIR__ . '/../vendor/autoload.php';
 
 use Illuminate\Support\Str;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprArrayNode;

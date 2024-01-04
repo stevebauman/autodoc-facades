@@ -56,9 +56,10 @@
             "url": "git@github.com:laravel/facade-documenter.git"
         }
     },
+    "bin": "facade.php",
     "scripts": {
         "post-update-cmd": [
-            "cp vendor/laravel/facade-documenter/facade.php src/facade.php"
+            "cp vendor/laravel/facade-documenter/facade.php facade.php"
         ]
     },
     "extra": {
