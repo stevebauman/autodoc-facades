@@ -4,6 +4,23 @@
 Auto-generate PHP doc annotations for your Laravel application facades.
 </p>
 
+<p align="center">
+<a href="https://github.com/stevebauman/autodoc-facades/actions" target="_blank">
+<img src="https://img.shields.io/github/actions/workflow/status/stevebauman/autodoc-facades/run-tests.yml?branch=master&style=flat-square"/>
+</a>
+
+<a href="https://packagist.org/packages/stevebauman/autodoc-facades" target="_blank">
+<img src="https://img.shields.io/packagist/v/stevebauman/autodoc-facades.svg?style=flat-square"/>
+</a>
+
+<a href="https://packagist.org/packages/stevebauman/autodoc-facades" target="_blank">
+<img src="https://img.shields.io/packagist/dt/stevebauman/autodoc-facades.svg?style=flat-square"/>
+</a>
+
+<a href="https://packagist.org/packages/stevebauman/autodoc-facades" target="_blank">
+<img src="https://img.shields.io/packagist/l/stevebauman/autodoc-facades.svg?style=flat-square"/>
+</a>
+
 Autodoc Facades uses the official Laravel [Facade Documenter](https://github.com/laravel/facade-documenter) and [Lody](https://github.com/lorisleiva/lody) by @lorisleiva to easily generate doc annotations for your application's Laravel facades using the "@see" annotation with a single command:
 
 ```php
