@@ -71,8 +71,30 @@ composer require --dev stevebauman/autodoc-facades
 
 ## Usage
 
+Inside the terminal:
+
 ```bash
 php artisan autodoc:facades {paths} {--only=} {--except=}
+```
+
+Inside a Laravel command:
+
+```php
+namespace App\Console\Commands;
+
+class GenerateFacadeDocs extends Command
+{
+    // ...
+
+    public function handle(): int
+    {
+        return $this->call('autodoc:facades', [
+            'paths' => ['app'],
+            '--except' => ['...'],
+            '--only' => ['...'],
+        ]);
+    }
+}
 ```
 
 ### Getting started
