@@ -74,7 +74,7 @@ class DocumentFacades extends Command
     protected function paths(): array
     {
         return array_map(fn (string $path) => (
-            Str::startsWith(DIRECTORY_SEPARATOR, $path) ? $path : base_path($path)
+            Str::startsWith($path, DIRECTORY_SEPARATOR) ? $path : base_path($path)
         ), (array) $this->argument('paths'));
     }
 }
