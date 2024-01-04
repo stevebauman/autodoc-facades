@@ -13,4 +13,9 @@ abstract class TestCase extends BaseTestCase
             AutodocFacadeServiceProvider::class,
         ];
     }
+
+    protected function fixturePath(?string $path = null): string
+    {
+        return implode(DIRECTORY_SEPARATOR, [getcwd(), 'tests', 'Fixtures', $path]);
+    }
 }
