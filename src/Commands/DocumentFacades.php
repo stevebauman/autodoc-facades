@@ -3,9 +3,12 @@
 namespace Stevebauman\AutodocFacades\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Str;
 use Lorisleiva\Lody\Lody;
+use Spatie\StructureDiscoverer\Discover;
 
 class DocumentFacades extends Command
 {
@@ -28,9 +31,10 @@ class DocumentFacades extends Command
      */
     public function handle(): int
     {
-        $facades = Lody::classes($this->argument('paths'))
-            ->isNotAbstract()
-            ->isInstanceOf(Facade::class);
+        $facades = collect(Discover::in(...(array) $this->argument('paths'))
+            ->classes()
+            ->extending(Facade::class)
+            ->get());
 
         if ($only = $this->option('only')) {
             $facades = $facades->filter(
@@ -53,5 +57,28 @@ class DocumentFacades extends Command
         return $result->successful()
             ? static::SUCCESS
             : static::FAILURE;
+    }
+
+    /**
+     * Get the application's facades.
+     */
+    protected function facades(): Collection
+    {
+        return collect(
+            Discover::in(...$this->paths())
+                ->classes()
+                ->extending(Facade::class)
+                ->get()
+        );
+    }
+
+    /**
+     * Get all the paths to check.
+     */
+    protected function paths(): array
+    {
+        return array_map(fn (string $path) => (
+            Str::startsWith(DIRECTORY_SEPARATOR, $path) ? $path : base_path($path)
+        ), (array) $this->argument('paths'));
     }
 }
