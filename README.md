@@ -4,7 +4,11 @@
 Auto-generate PHP doc annotations for your Laravel application facades.
 </p>
 
-Autodoc Facades uses the official Laravel [Facade Documenter](https://github.com/laravel/facade-documenter) and [Lody](https://github.com/lorisleiva/lody) by @lorisleiva to easily generate doc annotations for your application's Laravel facades using the "@see" annotation:
+Autodoc Facades uses the official Laravel [Facade Documenter](https://github.com/laravel/facade-documenter) and [Lody](https://github.com/lorisleiva/lody) by @lorisleiva to easily generate doc annotations for your application's Laravel facades using the "@see" annotation with a single command:
+
+```php
+php artisan autodoc facades app
+```
 
 **Before**:
 
