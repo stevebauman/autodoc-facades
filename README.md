@@ -51,8 +51,8 @@ class ServiceManager
 namespace App\Facades;
 
 /**
-+ * @method static array all(string $param)
-+ * 
++* @method static array all(string $param)
++* 
  * @see \App\Services\ServiceManager
  */
 class Service extends Facade
