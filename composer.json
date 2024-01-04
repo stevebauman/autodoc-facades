@@ -12,7 +12,6 @@
     "archive": {
         "exclude": [
             "/app/",
-            "/tests/",
             "/config/",
             "/bootstrap/"
         ]
