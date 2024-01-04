@@ -1,17 +1,16 @@
 <?php
 
+namespace Tests\Feature;
+
 use App\Commands\Facades;
 use Tests\Fixtures\FacadeWithSee;
-use Tests\TestCase;
 use function Pest\testDirectory;
-
-uses(TestCase::class);
 
 beforeEach(function () {
     // Store the current state of the files in the Fixtures directory
     $this->originalFileContents = [];
 
-    foreach (glob(__DIR__ . '/Fixtures/*') as $file) {
+    foreach (glob(testDirectory('Fixtures/*')) as $file) {
         $this->originalFileContents[$file] = file_get_contents($file);
     }
 });
