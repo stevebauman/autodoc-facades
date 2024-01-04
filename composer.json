@@ -16,6 +16,10 @@
             "/bootstrap/"
         ]
     },
+    "dist": {
+        "url": "https://raw.githubusercontent.com/stevebauman/autodoc-facade/master/builds/autodoc",
+        "type": "file"
+    },
     "authors": [
         {
             "name": "Steve Bauman",
