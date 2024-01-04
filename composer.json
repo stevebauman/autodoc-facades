@@ -9,6 +9,14 @@
         "issues": "https://github.com/stevebauman/autodoc-facades/issues",
         "source": "https://github.com/stevebauman/autodoc-facades"
     },
+    "archive": {
+        "exclude": [
+            "/app/",
+            "/tests/",
+            "/config/",
+            "/bootstrap/"
+        ]
+    },
     "authors": [
         {
             "name": "Steve Bauman",
