@@ -60,5 +60,12 @@
         "post-update-cmd": [
             "cp vendor/laravel/facade-documenter/facade.php src/facade.php"
         ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Stevebauman\\AutodocFacades\\AutodocServiceProvider"
+            ]
+        }
     }
 }

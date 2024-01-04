@@ -3,14 +3,14 @@
 namespace Stevebauman\AutodocFacades\Tests;
 
 use Orchestra\Testbench\TestCase as BaseTestCase;
-use Stevebauman\AutodocFacades\AutodocFacadeServiceProvider;
+use Stevebauman\AutodocFacades\AutodocServiceProvider;
 
 abstract class TestCase extends BaseTestCase
 {
     protected function getPackageProviders($app)
     {
         return [
-            AutodocFacadeServiceProvider::class,
+            AutodocServiceProvider::class,
         ];
     }
 

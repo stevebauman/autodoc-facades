@@ -5,7 +5,7 @@ namespace Stevebauman\AutodocFacades;
 use Illuminate\Support\ServiceProvider;
 use Stevebauman\AutodocFacades\Commands\DocumentFacades;
 
-class AutodocFacadeServiceProvider extends ServiceProvider
+class AutodocServiceProvider extends ServiceProvider
 {
     /**
      * Register any application services.
