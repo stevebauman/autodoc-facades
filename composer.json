@@ -58,7 +58,7 @@
     },
     "minimum-stability": "stable",
     "prefer-stable": true,
-    "bin": ["builds/autodoc"],
+    "bin": ["autodoc"],
     "repositories": {
         "facade-documenter": {
             "type": "vcs",
