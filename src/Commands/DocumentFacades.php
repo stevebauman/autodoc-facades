@@ -30,10 +30,7 @@ class DocumentFacades extends Command
      */
     public function handle(): int
     {
-        $facades = collect(Discover::in(...(array) $this->argument('paths'))
-            ->classes()
-            ->extending(Facade::class)
-            ->get());
+        $facades = $this->facades();
 
         if ($only = $this->option('only')) {
             $facades = $facades->filter(
