@@ -1,6 +1,7 @@
 name: update-facade-documenter
 
 on:
+  workflow_dispatch:
   schedule:
     - cron: "0 0 * * *"
 
@@ -24,11 +25,9 @@ jobs:
           php-version: ${{ matrix.php }}
 
       - name: Update dependencies
-        run: |
-          composer update
+        run: composer update
 
       - name: Commit new facade build
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
-            commit_message: Apply pint changes
-
+            commit_message: Update facade build
