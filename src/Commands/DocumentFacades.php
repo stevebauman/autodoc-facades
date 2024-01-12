@@ -7,19 +7,22 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Str;
-use Spatie\StructureDiscoverer\Discover;
+use Symfony\Component\Finder\Finder;
 
 class DocumentFacades extends Command
 {
     /**
-     * The signature of the command.
+     * The console command signature.
      *
      * @var string
      */
-    protected $signature = 'autodoc:facades {paths*} {--only=*} {--except=*}';
+    protected $signature = 'autodoc:facades 
+                                {path : The path of the facades}
+                                {--only=* : Class names of the facades to be only from the path}
+                                {--except=* : Class names of the facades to be excluded from the path}';
 
     /**
-     * The description of the command.
+     * The console command description.
      *
      * @var string
      */
@@ -30,51 +33,47 @@ class DocumentFacades extends Command
      */
     public function handle(): int
     {
-        $facades = $this->facades();
+        $this->info('Generating document annotations...');
 
-        if ($only = $this->option('only')) {
-            $facades = $facades->filter(
-                fn (string $classname) => in_array($classname, $only)
-            );
-        } elseif ($except = $this->option('except')) {
-            $facades = $facades->filter(
-                fn (string $classname) => ! in_array($classname, $except)
-            );
+        $result = Process::run(sprintf(
+            'php -f vendor/bin/facade.php -- %s',
+            $this->facades()
+                ->map(fn (string $class) => str_replace('\\', '\\\\', $class))
+                ->join(' ')
+        ));
+
+        if ($result->failed()) {
+            $this->error($result->output());
+
+            return self::FAILURE;
         }
 
-        $result = Process::run(sprintf('php -f vendor/bin/facade.php -- %s', $facades->map(
-            fn (string $classname) => str_replace('\\', '\\\\', $classname)
-        )->join(' ')));
+        $this->info($result->output());
 
-        $result->successful()
-            ? $this->info($result->output())
-            : $this->error($result->output());
-
-        return $result->successful()
-            ? static::SUCCESS
-            : static::FAILURE;
+        return self::SUCCESS;
     }
 
     /**
-     * Get the application's facades.
+     * Get a file from base path.
      */
     protected function facades(): Collection
     {
-        return collect(
-            Discover::in(...$this->paths())
-                ->classes()
-                ->extending(Facade::class)
-                ->get()
-        );
-    }
+        $except = $this->option('except');
+        $only = $this->option('only');
 
-    /**
-     * Get all the paths to check.
-     */
-    protected function paths(): array
-    {
-        return array_map(fn (string $path) => (
-            Str::startsWith($path, DIRECTORY_SEPARATOR) ? $path : base_path($path)
-        ), (array) $this->argument('paths'));
+        return collect((new Finder)->files()->depth(0)->in($this->argument('path'))->name('*.php'))
+            ->map(function ($class) {
+                $namespace = $this->laravel->getNamespace();
+
+                return $namespace.str_replace(
+                    ['/', '.php'],
+                    ['\\', ''],
+                    Str::after($class->getRealPath(), realpath(app_path()).DIRECTORY_SEPARATOR)
+                );
+            })
+            ->filter(fn (string $class) => class_exists($class))
+            ->filter(fn (string $class) => is_subclass_of($class, Facade::class))
+            ->when(! empty($except), fn ($classes) => $classes->reject(fn ($class) => ! in_array($class, $except)))
+            ->when(! empty($only), fn ($classes) => $classes->reject(fn ($class) => in_array($class, $only)));
     }
 }
