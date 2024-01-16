@@ -17,9 +17,9 @@ class DocumentFacades extends Command
      * @var string
      */
     protected $signature = 'autodoc:facades 
-                                {path : The path of the facades}
-                                {--only=* : Class names of the facades to be only from the path}
-                                {--except=* : Class names of the facades to be excluded from the path}';
+                                {paths : The paths of the facades}
+                                {--only=* : Class names of the facades to be only from the paths}
+                                {--except=* : Class names of the facades to be excluded from the paths}';
 
     /**
      * The console command description.
@@ -61,7 +61,7 @@ class DocumentFacades extends Command
         $except = $this->option('except');
         $only = $this->option('only');
 
-        return collect(Finder::create()->files()->depth(0)->in($this->argument('path'))->name('*.php'))
+        return collect(Finder::create()->files()->depth(0)->in($this->argument('paths'))->name('*.php'))
             ->map(fn (SplFileInfo $class) => $this->getFullNamespace($class->getRealpath()) . '\\' . $class->getFilenameWithoutExtension())
             ->filter(fn (string $class) => class_exists($class))
             ->filter(fn (string $class) => is_subclass_of($class, Facade::class))

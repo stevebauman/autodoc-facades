@@ -16,7 +16,7 @@ Auto-generate PHP doc annotations for your Laravel application facades.
 Autodoc Facades uses the official Laravel [Facade Documenter](https://github.com/laravel/facade-documenter) to easily generate doc annotations for your application's Laravel facades inside your `app` directory using the `@see` annotation with a single command:
 
 ```php
-php artisan autodoc:facades ./app
+php artisan autodoc:facades app
 ```
 
 **Before**:
@@ -74,7 +74,7 @@ composer require --dev stevebauman/autodoc-facades
 Inside the terminal:
 
 ```bash
-php artisan autodoc:facades {path} {--only=} {--except=}
+php artisan autodoc:facades {paths} {--only=} {--except=}
 ```
 
 Inside a Laravel command:
@@ -89,7 +89,7 @@ class GenerateFacadeDocs extends Command
     public function handle(): int
     {
         return $this->call('autodoc:facades', [
-            'path' => ['./app'],
+            'paths' => ['app'],
             '--except' => ['...'],
             '--only' => ['...'],
         ]);
@@ -158,18 +158,18 @@ class ServiceManager
 
 To generate doc annotations for all facades in your `app` directory, supply "app" as the path:
 
-> All path you provide that do not start with a directory separator will use the commands current working directory as the base path.
+> All paths you provide that do not start with a directory separator will use the commands current working directory as the base path.
 
 ```bash
-php artisan autodoc:facades ./app
+php artisan autodoc:facades app
 ```
 
-### Generating annotations in many path
+### Generating annotations in many paths
 
-Space separate path to generate annotations for facades in those directories:
+Space separate paths to generate annotations for facades in those directories:
 
 ```bash
-php artisan autodoc:facades ./app/Services/Facades app/Api/Facades
+php artisan autodoc:facades app/Services/Facades app/Api/Facades
 ```
 
 ### Generating annotations for specific facades
@@ -179,7 +179,7 @@ Specify "only" classes to generate annotations only for those given:
 > You may provide multiple "only" classes by space separating them.
 
 ```bash
-php artisan autodoc:facades ./app --only App\Facades\Service
+php artisan autodoc:facades app --only App\Facades\Service
 ```
 
 ### Generating annotations for except specific facades
@@ -189,5 +189,5 @@ Specify "except" classes to generate annotations for all facades, except for tho
 > You may provide multiple "except" classes by space separating them.
 
 ```bash
-php artisan autodoc:facades ./app --except App\Facades\Service
+php artisan autodoc:facades app --except App\Facades\Service
 ```
