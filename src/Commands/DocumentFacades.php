@@ -6,8 +6,8 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Str;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 class DocumentFacades extends Command
 {
@@ -61,19 +61,24 @@ class DocumentFacades extends Command
         $except = $this->option('except');
         $only = $this->option('only');
 
-        return collect((new Finder)->files()->depth(0)->in($this->argument('path'))->name('*.php'))
-            ->map(function ($class) {
-                $namespace = $this->laravel->getNamespace();
-
-                return $namespace.str_replace(
-                    ['/', '.php'],
-                    ['\\', ''],
-                    Str::after($class->getRealPath(), realpath(app_path()).DIRECTORY_SEPARATOR)
-                );
-            })
+        return collect(Finder::create()->files()->depth(0)->in($this->argument('path'))->name('*.php'))
+            ->map(fn (SplFileInfo $class) => $this->getFullNamespace($class->getRealpath()) . '\\' . $class->getFilenameWithoutExtension())
             ->filter(fn (string $class) => class_exists($class))
             ->filter(fn (string $class) => is_subclass_of($class, Facade::class))
-            ->when(! empty($except), fn ($classes) => $classes->reject(fn ($class) => ! in_array($class, $except)))
-            ->when(! empty($only), fn ($classes) => $classes->reject(fn ($class) => in_array($class, $only)));
+            ->when(! empty($except), fn (Collection $collection) => $collection->filter(fn ($class) => ! in_array($class, $except)))
+            ->when(! empty($only), fn (Collection $collection) => $collection->filter(fn ($class) => in_array($class, $only)));
+    }
+
+    /**
+     * Get a namespace based on a real path.
+     */
+    protected function getFullNamespace(string $filename):string
+    {
+        $namespaces = preg_grep('/^namespace /', file($filename));
+
+        $match = [];
+        preg_match('/^namespace (.*);$/', array_shift($namespaces), $match);
+
+        return array_pop($match);
     }
 }

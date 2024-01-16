@@ -30,7 +30,7 @@ class FacadesTest extends TestCase
     public function testItDocumentsFacadesWithSeeAnnotations()
     {
         $this->artisan(DocumentFacades::class, [
-            'paths' => $this->fixturePath(),
+            'path' => $this->fixturePath(),
         ]);
 
         $contents = file_get_contents($this->fixturePath('FacadeWithSee.php'));
@@ -42,7 +42,7 @@ class FacadesTest extends TestCase
     public function testItDoesntDocumentFacadesWhenExcluded()
     {
         $this->artisan(DocumentFacades::class, [
-            'paths' => $this->fixturePath(),
+            'path' => $this->fixturePath(),
             '--except' => [FacadeWithSee::class],
         ]);
 
@@ -52,7 +52,7 @@ class FacadesTest extends TestCase
     public function testItDocumentsFacadesWhenIncluded()
     {
         $this->artisan(DocumentFacades::class, [
-            'paths' => $this->fixturePath(),
+            'path' => $this->fixturePath(),
             '--only' => [FacadeWithSee::class],
         ]);
 
