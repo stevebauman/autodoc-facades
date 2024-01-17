@@ -6,20 +6,23 @@ use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Str;
-use Spatie\StructureDiscoverer\Discover;
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Finder\SplFileInfo;
 
 class DocumentFacades extends Command
 {
     /**
-     * The signature of the command.
+     * The console command signature.
      *
      * @var string
      */
-    protected $signature = 'autodoc:facades {paths*} {--only=*} {--except=*}';
+    protected $signature = 'autodoc:facades 
+                            {paths : The paths of the facades}
+                            {--only=* : The class names of facades to include for documentation}
+                            {--except=* : The class names of facades to exclude from documentation}';
 
     /**
-     * The description of the command.
+     * The console command description.
      *
      * @var string
      */
@@ -30,51 +33,66 @@ class DocumentFacades extends Command
      */
     public function handle(): int
     {
-        $facades = $this->facades();
+        $this->info('Generating document annotations...');
 
-        if ($only = $this->option('only')) {
-            $facades = $facades->filter(
-                fn (string $classname) => in_array($classname, $only)
-            );
-        } elseif ($except = $this->option('except')) {
-            $facades = $facades->filter(
-                fn (string $classname) => ! in_array($classname, $except)
-            );
+        $result = Process::run(sprintf(
+            'php -f vendor/bin/facade.php -- %s',
+            $this->getFacades()->map(
+                fn (string $class) => str_replace('\\', '\\\\', $class)
+            )->join(' ')
+        ));
+
+        if ($result->failed()) {
+            $this->error($result->output());
+
+            return self::FAILURE;
         }
 
-        $result = Process::run(sprintf('php -f vendor/bin/facade.php -- %s', $facades->map(
-            fn (string $classname) => str_replace('\\', '\\\\', $classname)
-        )->join(' ')));
+        $this->info($result->output());
 
-        $result->successful()
-            ? $this->info($result->output())
-            : $this->error($result->output());
-
-        return $result->successful()
-            ? static::SUCCESS
-            : static::FAILURE;
+        return self::SUCCESS;
     }
 
     /**
-     * Get the application's facades.
+     * Get all the facades in the command paths.
      */
-    protected function facades(): Collection
+    protected function getFacades(): Collection
     {
-        return collect(
-            Discover::in(...$this->paths())
-                ->classes()
-                ->extending(Facade::class)
-                ->get()
-        );
+        return collect($this->getFiles())->map(fn (SplFileInfo $file) => (
+            $this->getNamespace($file->getRealpath()) . '\\' . $file->getFilenameWithoutExtension()
+        ))->filter(fn (string $class) => (
+            class_exists($class) && is_subclass_of($class, Facade::class)
+        ))->when($this->option('only'), fn (Collection $facades, array $only) => (
+            $facades->filter(fn ($class) => in_array($class, $only))
+        ))->when($this->option('except'), fn (Collection $facades, array $except) => (
+            $facades->filter(fn ($class) => ! in_array($class, $except))
+        ));
     }
 
     /**
-     * Get all the paths to check.
+     * Get all the PHP files in the command paths.
      */
-    protected function paths(): array
+    protected function getFiles(): Finder
     {
-        return array_map(fn (string $path) => (
-            Str::startsWith($path, DIRECTORY_SEPARATOR) ? $path : base_path($path)
-        ), (array) $this->argument('paths'));
+        return Finder::create()
+            ->in($this->argument('paths'))
+            ->name('*.php')
+            ->files();
+    }
+
+    /**
+     * Get the namespace of the given file.
+     */
+    protected function getNamespace(string $filename): ?string
+    {
+        if (! $namespaces = preg_grep('/^namespace /', file($filename))) {
+            return null;
+        }
+
+        if (! preg_match('/^namespace (.*);$/', array_shift($namespaces), $match)) {
+            return null;
+        }
+
+        return array_pop($match);
     }
 }
