@@ -17,9 +17,9 @@ class DocumentFacades extends Command
      * @var string
      */
     protected $signature = 'autodoc:facades 
-                                {paths : The paths of the facades}
-                                {--only=* : Class names of the facades to be only from the paths}
-                                {--except=* : Class names of the facades to be excluded from the paths}';
+                            {paths : The paths of the facades}
+                            {--only=* : The class names of facades to include for documentation}
+                            {--except=* : The class names of facades to exclude from documentation}';
 
     /**
      * The console command description.
@@ -37,9 +37,9 @@ class DocumentFacades extends Command
 
         $result = Process::run(sprintf(
             'php -f vendor/bin/facade.php -- %s',
-            $this->facades()
-                ->map(fn (string $class) => str_replace('\\', '\\\\', $class))
-                ->join(' ')
+            $this->getFacades()->map(
+                fn (string $class) => str_replace('\\', '\\\\', $class)
+            )->join(' ')
         ));
 
         if ($result->failed()) {
@@ -54,29 +54,39 @@ class DocumentFacades extends Command
     }
 
     /**
-     * Get a file from base path.
+     * Get all the facades in the command paths.
      */
-    protected function facades(): Collection
+    protected function getFacades(): Collection
     {
-        $except = $this->option('except');
-        $only = $this->option('only');
-
-        return collect(Finder::create()->files()->depth(0)->in($this->argument('paths'))->name('*.php'))
-            ->map(fn (SplFileInfo $class) => $this->getFullNamespace($class->getRealpath()) . '\\' . $class->getFilenameWithoutExtension())
-            ->filter(fn (string $class) => class_exists($class))
-            ->filter(fn (string $class) => is_subclass_of($class, Facade::class))
-            ->when(! empty($except), fn (Collection $collection) => $collection->filter(fn ($class) => ! in_array($class, $except)))
-            ->when(! empty($only), fn (Collection $collection) => $collection->filter(fn ($class) => in_array($class, $only)));
+        return collect($this->getFiles())->map(fn (SplFileInfo $file) => (
+            $this->getNamespace($file->getRealpath()) . '\\' . $file->getFilenameWithoutExtension()
+        ))->filter(fn (string $class) => (
+            class_exists($class) && is_subclass_of($class, Facade::class)
+        ))->when($this->option('only'), fn (Collection $facades, array $only) => (
+            $facades->filter(fn ($class) => in_array($class, $only))
+        ))->when($this->option('except'), fn (Collection $facades, array $except) => (
+            $facades->filter(fn ($class) => ! in_array($class, $except))
+        ));
     }
 
     /**
-     * Get a namespace based on a real path.
+     * Get all the PHP files in the command paths.
      */
-    protected function getFullNamespace(string $filename):string
+    protected function getFiles(): Finder
+    {
+        return Finder::create()
+            ->in($this->argument('paths'))
+            ->name('*.php')
+            ->files();
+    }
+
+    /**
+     * Get the namespace of the given file.
+     */
+    protected function getNamespace(string $filename): ?string
     {
         $namespaces = preg_grep('/^namespace /', file($filename));
 
-        $match = [];
         preg_match('/^namespace (.*);$/', array_shift($namespaces), $match);
 
         return array_pop($match);
