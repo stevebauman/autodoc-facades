@@ -85,9 +85,13 @@ class DocumentFacades extends Command
      */
     protected function getNamespace(string $filename): ?string
     {
-        $namespaces = preg_grep('/^namespace /', file($filename));
+        if (! $namespaces = preg_grep('/^namespace /', file($filename))) {
+            return null;
+        }
 
-        preg_match('/^namespace (.*);$/', array_shift($namespaces), $match);
+        if (! preg_match('/^namespace (.*);$/', array_shift($namespaces), $match)) {
+            return null;
+        }
 
         return array_pop($match);
     }
