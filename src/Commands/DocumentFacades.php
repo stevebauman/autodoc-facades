@@ -38,7 +38,7 @@ class DocumentFacades extends Command
         $result = Process::run(sprintf(
             'php -f vendor/bin/facade.php -- %s',
             $this->getFacades()->map(
-                fn (string $class) => str_replace('\\', '\\\\', $class)
+                fn (string $class) => windows_os() ? $class : str_replace('\\', '\\\\', $class)
             )->join(' ')
         ));
 
@@ -89,10 +89,13 @@ class DocumentFacades extends Command
             return null;
         }
 
-        if (! preg_match('/^namespace (.*);$/', array_shift($namespaces), $match)) {
+        $namespace = array_shift($namespaces);
+        $namespace = trim($namespace);
+
+        if (! preg_match('/^namespace (?P<namespace>.*);$/', $namespace, $match)) {
             return null;
         }
 
-        return array_pop($match);
+        return $match['namespace'];
     }
 }
