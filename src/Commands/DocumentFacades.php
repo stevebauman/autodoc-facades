@@ -89,10 +89,12 @@ class DocumentFacades extends Command
             return null;
         }
 
-        if (! preg_match('/^namespace (.*);$/', array_shift($namespaces), $match)) {
+        $namespace = trim(array_shift($namespaces));
+
+        if (! preg_match('/^namespace (?P<namespace>.*);$/', $namespace, $match)) {
             return null;
         }
 
-        return array_pop($match);
+        return $match['namespace'];
     }
 }
