@@ -37,9 +37,9 @@ class DocumentFacades extends Command
 
         $result = Process::run(sprintf(
             'php -f vendor/bin/facade.php -- %s',
-            $this->getFacades()->map(
-                fn (string $class) => str_replace('\\', '\\\\', $class)
-            )->join(' ')
+            $this->getFacades()->map(fn (string $class) => (
+                windows_os() ? $class : str_replace('\\', '\\\\', $class)
+            ))->join(' ')
         ));
 
         if ($result->failed()) {
