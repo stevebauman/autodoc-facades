@@ -5,7 +5,7 @@ namespace Stevebauman\AutodocFacades\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
-use Illuminate\Support\Facades\Process;
+use Symfony\Component\Process\Process;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
 
@@ -35,22 +35,25 @@ class DocumentFacades extends Command
     {
         $this->info('Generating document annotations...');
 
-        $result = Process::run(sprintf(
-            'php -f vendor/bin/facade.php -- %s',
-            $this->getFacades()->map(fn (string $class) => (
-                windows_os() ? $class : str_replace('\\', '\\\\', $class)
-            ))->join(' ')
-        ));
+        $process = new Process([
+            'php',
+            '-f',
+            'vendor/bin/facade.php',
+            '--',
+            ...$this->getFacades()
+        ]);
 
-        if ($result->failed()) {
-            $this->error($result->output());
+        $process->run();
 
-            return self::FAILURE;
+        if ($process->isSuccessful()) {
+            $this->info($process->getOutput());
+
+            return self::SUCCESS;
         }
 
-        $this->info($result->output());
+        $this->error($process->getErrorOutput());
 
-        return self::SUCCESS;
+        return self::FAILURE;
     }
 
     /**
