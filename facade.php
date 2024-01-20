@@ -88,6 +88,8 @@ collect($argv)
          */
         PHP;
 
+        $docblock = preg_replace("/\r*\n/", "\r\n", $docblock);
+
         if (($facade->getDocComment() ?: '') === $docblock) {
             return;
         }
