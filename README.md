@@ -1,7 +1,7 @@
 <h1 align="center">Autodoc Facades</h1>
 
 <p align="center">
-A zero-dependencies facade documenter for your Laravel application.
+A facade documenter for your Laravel application.
 </p>
 
 <p align="center">
