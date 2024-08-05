@@ -35,6 +35,11 @@ collect($argv)
     ->each(function ($facade) use ($linting) {
         $proxies = resolveDocSees($facade);
 
+        if ($proxies->isEmpty()) {
+            echo "Skipping [{$facade->getName()}] as no proxies were found.".PHP_EOL;
+            return;
+        }
+
         // Build a list of methods that are available on the Facade...
 
         $resolvedMethods = $proxies->map(fn ($fqcn) => new ReflectionClass($fqcn))
@@ -77,6 +82,11 @@ collect($argv)
         // To support generics, we want to preserve any mixins on the class...
 
         $directMixins = resolveDocTags($facade->getDocComment() ?: '', '@mixin');
+
+        if ($methods->isEmpty()) {
+            echo "Skipping [{$facade->getName()}] as no methods were found.".PHP_EOL;
+            return;
+        }
 
         // Generate the docblock...
 
