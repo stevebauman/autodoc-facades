@@ -10,8 +10,11 @@ use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprIntegerNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprNullNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprStringNode;
 use PHPStan\PhpDocParser\Ast\ConstExpr\ConstExprTrueNode;
+use PHPStan\PhpDocParser\Ast\ConstExpr\ConstFetchNode;
+use PHPStan\PhpDocParser\Ast\Type\ArrayShapeNode;
 use PHPStan\PhpDocParser\Ast\Type\ArrayTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\CallableTypeNode;
+use PHPStan\PhpDocParser\Ast\Type\ConditionalTypeForParameterNode;
 use PHPStan\PhpDocParser\Ast\Type\ConditionalTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\ConstTypeNode;
 use PHPStan\PhpDocParser\Ast\Type\GenericTypeNode;
@@ -37,6 +40,7 @@ collect($argv)
 
         if ($proxies->isEmpty()) {
             echo "Skipping [{$facade->getName()}] as no proxies were found.".PHP_EOL;
+
             return;
         }
 
@@ -75,16 +79,17 @@ collect($argv)
 
         if ($facade->getName() === Illuminate\Support\Facades\Date::class) {
             $methods->prepend(' *')
-                    ->prepend(' * @see https://github.com/briannesbitt/Carbon/blob/master/src/Carbon/Factory.php')
-                    ->prepend(' * @see https://carbon.nesbot.com/docs/');
+                ->prepend(' * @see https://github.com/briannesbitt/Carbon/blob/master/src/Carbon/Factory.php')
+                ->prepend(' * @see https://carbon.nesbot.com/docs/');
         }
 
         // To support generics, we want to preserve any mixins on the class...
 
-        $directMixins = resolveDocTags($facade->getDocComment() ?: '', '@mixin');
+        $directMixins = resolveDocTags($facade->getDocComment() ?: '', '@mixin ');
 
         if ($methods->isEmpty()) {
             echo "Skipping [{$facade->getName()}] as no methods were found.".PHP_EOL;
+
             return;
         }
 
@@ -126,7 +131,7 @@ exit(0);
  */
 function resolveDocSees($class)
 {
-    return resolveDocTags($class->getDocComment() ?: '', '@see')
+    return resolveDocTags($class->getDocComment() ?: '', '@see ')
         ->reject(fn ($tag) => str_starts_with($tag, 'https://'));
 }
 
@@ -138,7 +143,7 @@ function resolveDocSees($class)
  */
 function resolveDocMethods($class)
 {
-    return resolveDocTags($class->getDocComment() ?: '', '@method')
+    return resolveDocTags($class->getDocComment() ?: '', '@method ')
         ->map(fn ($tag) => Str::squish($tag))
         ->map(fn ($tag) => Str::before($tag, ')').')');
 }
@@ -301,6 +306,10 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
                 return 'string';
             }
 
+            if ($typeNode->constExpr instanceof ConstFetchNode && $typeNode->constExpr->className === '\\Psr\\Log\\LogLevel') {
+                return 'string';
+            }
+
             if ($typeNode->constExpr instanceof ConstExprIntegerNode) {
                 return 'int';
             }
@@ -327,14 +336,22 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
 
             $class = $typeNode->constExpr::class;
             throw new UnresolvableType('resolveDocblockTypes', <<<MESSAGE
-                Unknown constant type [{$class}] encountered.
+                Unknown constant type [{$class}] encountered when evaluating [{$method->sourceClass()->getName()}::{$method->getName()}].
                 MESSAGE);
+        }
+
+        if ($typeNode instanceof ArrayShapeNode) {
+            return 'array';
+        }
+
+        if ($typeNode instanceof ConditionalTypeForParameterNode) {
+            return resolveDocblockTypes($method, $typeNode->if, $depth + 1).'|'.resolveDocblockTypes($method, $typeNode->else, $depth + 1);
         }
 
         $class = $typeNode::class;
 
         throw new UnresolvableType('resolveDocblockTypes', <<<MESSAGE
-            Unknown type node [{$class}] encountered.
+            Unknown type node [{$class}] encountered when evaluating [{$method->sourceClass()->getName()}::{$method->getName()}].
             MESSAGE);
     } catch (UnresolvableType $e) {
         if ($depth > 1) {
@@ -530,7 +547,7 @@ function resolveDocTags($docblock, $tag)
  */
 function resolveDocMixins($class)
 {
-    return resolveDocTags($class->getDocComment() ?: '', '@mixin')
+    return resolveDocTags($class->getDocComment() ?: '', '@mixin ')
         ->map(fn ($mixin) => new ReflectionClass($mixin))
         ->flatMap(fn ($mixin) => [$mixin, ...resolveDocMixins($mixin)]);
 }
@@ -543,7 +560,7 @@ function resolveDocMixins($class)
  */
 function resolveDocParameters($method)
 {
-    return resolveDocTags($method->getDocComment() ?: '', '@param')
+    return resolveDocTags($method->getDocComment() ?: '', '@param ')
         ->map(fn ($tag) => Str::squish($tag));
 }
 
