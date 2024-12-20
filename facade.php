@@ -267,6 +267,10 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
                 return 'array';
             }
 
+            if ($typeNode->name === 'int-mask-of') {
+                return 'int';
+            }
+
             $guessedFqcn = resolveClassImports($method->getDeclaringClass())->get($typeNode->name) ?? '\\'.$method->getDeclaringClass()->getNamespaceName().'\\'.$typeNode->name;
 
             foreach ([$typeNode->name, $guessedFqcn] as $name) {
@@ -402,7 +406,7 @@ function handleConditionalType($method, $typeNode)
 function handleUnknownIdentifierType($method, $typeNode)
 {
     $docblock = parseDocblock($method->getDocComment());
-    $boundTemplateType = collect($docblock->getTemplateTagValues())->firstWhere('name', $typeNode->name)->bound;
+    $boundTemplateType = collect($docblock->getTemplateTagValues())->firstWhere('name', $typeNode->name)?->bound;
 
     if ($boundTemplateType !== null) {
         $resolvedTemplateType = resolveDocblockTypes($method, $boundTemplateType);
@@ -561,8 +565,6 @@ function resolveDocTags($docblock, $tag)
 function resolveDocMixins($class, $encoutered = new Collection)
 {
     if ($encoutered->contains($class->getName())) {
-        dump($class->getName());
-
         return collect();
     }
 
