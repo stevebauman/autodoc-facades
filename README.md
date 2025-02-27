@@ -131,7 +131,7 @@ use App\Services\ServiceManager;
  */
 class Service extends Facade
 {
-    protected function getFacadeAccessor()
+    protected function getFacadeAccessor(): string
     {
         return ServiceManager::class
     }
