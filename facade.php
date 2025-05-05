@@ -221,17 +221,21 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
 {
     try {
         if ($typeNode instanceof UnionTypeNode) {
-            return '('.collect($typeNode->types)
+            return str(collect($typeNode->types)
                 ->map(fn ($node) => resolveDocblockTypes($method, $node, $depth + 1))
                 ->unique()
-                ->implode('|').')';
+                ->implode('|'))
+                ->when($depth === 1, fn ($v) => $v->wrap('(', ')'))
+                ->toString();
         }
 
         if ($typeNode instanceof IntersectionTypeNode) {
-            return '('.collect($typeNode->types)
+            return str(collect($typeNode->types)
                 ->map(fn ($node) => resolveDocblockTypes($method, $node, $depth + 1))
                 ->unique()
-                ->implode('&').')';
+                ->implode('&'))
+                ->when($depth === 1, fn ($v) => $v->wrap('(', ')'))
+                ->toString();
         }
 
         if ($typeNode instanceof GenericTypeNode) {
