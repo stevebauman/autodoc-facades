@@ -762,6 +762,10 @@ function resolveDefaultValue($parameter)
     if ($parameter['name'] === '$mode' && $parameter['default'] === 493) {
         return '0755';
     }
+    
+    if ($parameter['default'] instanceof DateTimeInterface) {
+        return 'new \\'.get_class($parameter['default']);
+    }
 
     $default = json_encode($parameter['default']);
 
