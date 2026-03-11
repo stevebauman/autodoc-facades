@@ -4,6 +4,7 @@ namespace Stevebauman\AutodocFacades\Tests;
 
 use Stevebauman\AutodocFacades\Commands\DocumentFacades;
 use Stevebauman\AutodocFacades\Tests\Fixtures\FacadeWithSee;
+use Stevebauman\AutodocFacades\Tests\Fixtures\FacadeWithUseSee;
 
 class FacadesTest extends TestCase
 {
@@ -47,6 +48,19 @@ class FacadesTest extends TestCase
         ]);
 
         $this->assertStringNotContainsString('@method', file_get_contents($this->fixturePath('FacadeWithSee.php')));
+    }
+
+    public function testItDocumentsFacadesWithUseSeeAnnotations()
+    {
+        $this->artisan(DocumentFacades::class, [
+            'paths' => $this->fixturePath(),
+            '--only' => [FacadeWithUseSee::class],
+        ]);
+
+        $contents = file_get_contents($this->fixturePath('FacadeWithUseSee.php'));
+
+        $this->assertStringContainsString('@method static void foo()', $contents);
+        $this->assertStringContainsString('@method static void bar()', $contents);
     }
 
     public function testItDocumentsFacadesWhenIncluded()

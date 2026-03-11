@@ -29,6 +29,7 @@ use PHPStan\PhpDocParser\Parser\ConstExprParser;
 use PHPStan\PhpDocParser\Parser\PhpDocParser;
 use PHPStan\PhpDocParser\Parser\TokenIterator;
 use PHPStan\PhpDocParser\Parser\TypeParser;
+use PHPStan\PhpDocParser\ParserConfig;
 
 $linting = in_array('--lint', $argv);
 
@@ -132,8 +133,27 @@ exit(0);
  */
 function resolveDocSees($class)
 {
+    $imports = resolveClassImports($class);
+
     return resolveDocTags($class->getDocComment() ?: '', '@see ')
-        ->reject(fn ($tag) => str_starts_with($tag, 'https://'));
+        ->reject(fn ($tag) => str_starts_with($tag, 'https://'))
+        ->map(function ($tag) use ($class, $imports) {
+            if (str_starts_with($tag, '\\')) {
+                return $tag;
+            }
+
+            if ($resolved = $imports->get($tag)) {
+                return $resolved;
+            }
+
+            $fqcn = '\\'.$class->getNamespaceName().'\\'.$tag;
+
+            if (class_exists($fqcn) || interface_exists($fqcn)) {
+                return $fqcn;
+            }
+
+            return $tag;
+        });
 }
 
 /**
@@ -205,8 +225,10 @@ function resolveReturnDocType($method)
  */
 function parseDocblock($docblock)
 {
-    return (new PhpDocParser(new TypeParser(new ConstExprParser), new ConstExprParser))->parse(
-        new TokenIterator((new Lexer)->tokenize($docblock ?: '/** */'))
+    $parserConfig = new ParserConfig([]);
+
+    return (new PhpDocParser($parserConfig, new TypeParser($parserConfig, new ConstExprParser($parserConfig)), new ConstExprParser($parserConfig)))->parse(
+        new TokenIterator((new Lexer($parserConfig))->tokenize($docblock ?: '/** */'))
     );
 }
 
@@ -263,7 +285,7 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
                 return (string) $typeNode;
             }
 
-            if ($typeNode->name === 'class-string') {
+            if (in_array($typeNode->name, ['class-string', 'uppercase-string'], strict: true)) {
                 return 'string';
             }
 
@@ -271,7 +293,7 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
                 return 'array';
             }
 
-            if ($typeNode->name === 'int-mask-of') {
+            if (in_array($typeNode->name, ['int-mask-of', 'non-negative-int'], strict: true)) {
                 return 'int';
             }
 
@@ -299,7 +321,7 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
         }
 
         if ($typeNode instanceof ConditionalTypeNode) {
-            return handleConditionalType($method, $typeNode);
+            return resolveDocblockTypes($method, $typeNode->if).'|'.resolveDocblockTypes($method, $typeNode->else);
         }
 
         if ($typeNode instanceof NullableTypeNode) {
@@ -380,27 +402,6 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
 }
 
 /**
- * Handle conditional types.
- *
- * @param  \ReflectionMethodDecorator  $method
- * @param  \PHPStan\PhpDocParser\Ast\Type\ConditionalTypeNode  $typeNode
- * @return string
- */
-function handleConditionalType($method, $typeNode)
-{
-    if (
-        in_array($method->getname(), ['pull', 'get']) &&
-        $method->getDeclaringClass()->getName() === Illuminate\Cache\Repository::class
-    ) {
-        return 'mixed';
-    }
-
-    throw new UnresolvableType('handleConditionalType', <<<MESSAGE
-        Unknown conditional type encountered on method [{$method->getDeclaringClass()->getName()}::{$method->getName()}].
-        MESSAGE);
-}
-
-/**
  * Handle unknown identifier types.
  *
  * @param  \ReflectionMethodDecorator  $method
@@ -420,51 +421,7 @@ function handleUnknownIdentifierType($method, $typeNode)
         }
     }
 
-    if (
-        $typeNode->name === 'TCacheValue' &&
-        $method->getDeclaringClass()->getName() === Illuminate\Cache\Repository::class
-    ) {
-        return 'mixed';
-    }
-
-    if (
-        $typeNode->name === 'TWhenParameter' &&
-        in_array(Illuminate\Support\Traits\Conditionable::class, class_uses_recursive($method->getDeclaringClass()->getName()))
-    ) {
-        return 'mixed';
-    }
-
-    if (
-        $typeNode->name === 'TWhenReturnType' &&
-        in_array(Illuminate\Support\Traits\Conditionable::class, class_uses_recursive($method->getDeclaringClass()->getName()))
-    ) {
-        return 'mixed';
-    }
-
-    if (
-        $typeNode->name === 'TUnlessParameter' &&
-        in_array(Illuminate\Support\Traits\Conditionable::class, class_uses_recursive($method->getDeclaringClass()->getName()))
-    ) {
-        return 'mixed';
-    }
-
-    if (
-        $typeNode->name === 'TUnlessReturnType' &&
-        in_array(Illuminate\Support\Traits\Conditionable::class, class_uses_recursive($method->getDeclaringClass()->getName()))
-    ) {
-        return 'mixed';
-    }
-
-    if (
-        $typeNode->name === 'TEnum' &&
-        $method->getDeclaringClass()->getName() === Illuminate\Http\Request::class
-    ) {
-        return 'object';
-    }
-
-    throw new UnresolvableType('handleUnknownIdentifierType', <<<MESSAGE
-        Unknown doctype [{$typeNode->name}] encountered, which is likely a generic, on method [{$method->getDeclaringClass()->getName()}::{$method->getName()}].
-        MESSAGE);
+    return 'mixed';
 }
 
 /**
@@ -762,7 +719,7 @@ function resolveDefaultValue($parameter)
     if ($parameter['name'] === '$mode' && $parameter['default'] === 493) {
         return '0755';
     }
-    
+
     if ($parameter['default'] instanceof DateTimeInterface) {
         return 'new \\'.get_class($parameter['default']);
     }

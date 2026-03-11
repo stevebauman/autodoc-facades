@@ -35,10 +35,13 @@ class DocumentFacades extends Command
     {
         $this->info('Generating document annotations...');
 
+        $facade = dirname(__DIR__, 2).'/facade.php';
+        $autoload = dirname(__DIR__, 2).'/vendor/autoload.php';
+
         $process = new Process([
             'php',
-            '-f',
-            'vendor/bin/facade.php',
+            '-r',
+            sprintf('$_composer_autoload_path = %s; require %s;', var_export($autoload, true), var_export($facade, true)),
             '--',
             ...$this->getFacades()
         ]);
