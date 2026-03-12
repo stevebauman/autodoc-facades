@@ -38,7 +38,7 @@ collect($argv)
     ->filter(fn ($arg) => ! str_starts_with($arg, '-'))
     ->map(fn ($class) => new ReflectionClass($class))
     ->each(function ($facade) use ($linting) {
-        $proxies = resolveDocSees($facade);
+        $proxies = resolveProxies($facade);
 
         if ($proxies->isEmpty()) {
             echo "Skipping [{$facade->getName()}] as no proxies were found.".PHP_EOL;
@@ -126,6 +126,30 @@ echo 'Done.';
 exit(0);
 
 /**
+ * Resolve the proxies for the Facade.
+ *
+ * @param  \ReflectionClass  $class
+ * @return \Illuminate\Support\Collection<class-string>
+ */
+function resolveProxies($class)
+{
+    return resolveDocSees($class)
+        ->map(function ($proxy) use ($class) {
+            if (class_exists($proxy)) {
+                return $proxy;
+            }
+
+            $guessedFqcn = resolveClassImports($class)->get($proxy) ?? '\\'.$class->getNamespaceName().'\\'.$proxy;
+
+            if (class_exists($guessedFqcn)) {
+                return $guessedFqcn;
+            }
+
+            return $proxy;
+        });
+}
+
+/**
  * Resolve the classes referenced in the @see docblocks.
  *
  * @param  \ReflectionClass  $class
@@ -133,27 +157,8 @@ exit(0);
  */
 function resolveDocSees($class)
 {
-    $imports = resolveClassImports($class);
-
     return resolveDocTags($class->getDocComment() ?: '', '@see ')
-        ->reject(fn ($tag) => str_starts_with($tag, 'https://'))
-        ->map(function ($tag) use ($class, $imports) {
-            if (str_starts_with($tag, '\\')) {
-                return $tag;
-            }
-
-            if ($resolved = $imports->get($tag)) {
-                return $resolved;
-            }
-
-            $fqcn = '\\'.$class->getNamespaceName().'\\'.$tag;
-
-            if (class_exists($fqcn) || interface_exists($fqcn)) {
-                return $fqcn;
-            }
-
-            return $tag;
-        });
+        ->reject(fn ($tag) => str_starts_with($tag, 'https://'));
 }
 
 /**
