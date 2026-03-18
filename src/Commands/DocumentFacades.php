@@ -40,8 +40,8 @@ class DocumentFacades extends Command
 
         $process = new Process([
             'php',
-            '-r',
-            sprintf('$_composer_autoload_path = %s; require %s;', var_export($autoload, true), var_export($facade, true)),
+            '-f',
+            'vendor/bin/facade.php',
             '--',
             ...$this->getFacades()
         ]);
