@@ -28,7 +28,7 @@ class FacadesTest extends TestCase
         }
     }
 
-    public function testItDocumentsFacadesWithSeeAnnotations()
+    public function test_it_documents_facades_with_see_annotations()
     {
         $this->artisan(DocumentFacades::class, [
             'paths' => $this->fixturePath(),
@@ -40,7 +40,7 @@ class FacadesTest extends TestCase
         $this->assertStringContainsString('@method static void bar()', $contents);
     }
 
-    public function testItDoesntDocumentFacadesWhenExcluded()
+    public function test_it_doesnt_document_facades_when_excluded()
     {
         $this->artisan(DocumentFacades::class, [
             'paths' => $this->fixturePath(),
@@ -50,7 +50,7 @@ class FacadesTest extends TestCase
         $this->assertStringNotContainsString('@method', file_get_contents($this->fixturePath('FacadeWithSee.php')));
     }
 
-    public function testItDocumentsFacadesWithUseSeeAnnotations()
+    public function test_it_documents_facades_with_use_see_annotations()
     {
         $this->artisan(DocumentFacades::class, [
             'paths' => $this->fixturePath(),
@@ -63,7 +63,7 @@ class FacadesTest extends TestCase
         $this->assertStringContainsString('@method static void bar()', $contents);
     }
 
-    public function testItDocumentsFacadesWhenIncluded()
+    public function test_it_documents_facades_when_included()
     {
         $this->artisan(DocumentFacades::class, [
             'paths' => $this->fixturePath(),

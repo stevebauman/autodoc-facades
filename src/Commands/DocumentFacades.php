@@ -5,9 +5,9 @@ namespace Stevebauman\AutodocFacades\Commands;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
-use Symfony\Component\Process\Process;
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo;
+use Symfony\Component\Process\Process;
 
 class DocumentFacades extends Command
 {
@@ -34,13 +34,13 @@ class DocumentFacades extends Command
     public function handle(): int
     {
         $this->info('Generating document annotations...');
-        
+
         $process = new Process([
             'php',
             '-f',
             'vendor/bin/facade.php',
             '--',
-            ...$this->getFacades()
+            ...$this->getFacades(),
         ]);
 
         $process->run();
@@ -62,7 +62,7 @@ class DocumentFacades extends Command
     protected function getFacades(): Collection
     {
         return collect($this->getFiles())->map(fn (SplFileInfo $file) => (
-            $this->getNamespace($file->getRealpath()) . '\\' . $file->getFilenameWithoutExtension()
+            $this->getNamespace($file->getRealpath()).'\\'.$file->getFilenameWithoutExtension()
         ))->filter(fn (string $class) => (
             class_exists($class) && is_subclass_of($class, Facade::class)
         ))->when($this->option('only'), fn (Collection $facades, array $only) => (
