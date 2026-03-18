@@ -34,10 +34,7 @@ class DocumentFacades extends Command
     public function handle(): int
     {
         $this->info('Generating document annotations...');
-
-        $facade = dirname(__DIR__, 2).'/facade.php';
-        $autoload = dirname(__DIR__, 2).'/vendor/autoload.php';
-
+        
         $process = new Process([
             'php',
             '-f',
