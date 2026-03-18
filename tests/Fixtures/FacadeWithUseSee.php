@@ -5,6 +5,6 @@ namespace Stevebauman\AutodocFacades\Tests\Fixtures;
 use Illuminate\Support\Facades\Facade;
 
 /**
- * @see \Stevebauman\AutodocFacades\Tests\Fixtures\SeenClass
+ * @see SeenClass
  */
-class FacadeWithSee extends Facade {}
+class FacadeWithUseSee extends Facade {}

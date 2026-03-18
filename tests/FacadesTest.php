@@ -4,6 +4,7 @@ namespace Stevebauman\AutodocFacades\Tests;
 
 use Stevebauman\AutodocFacades\Commands\DocumentFacades;
 use Stevebauman\AutodocFacades\Tests\Fixtures\FacadeWithSee;
+use Stevebauman\AutodocFacades\Tests\Fixtures\FacadeWithUseSee;
 
 class FacadesTest extends TestCase
 {
@@ -27,7 +28,7 @@ class FacadesTest extends TestCase
         }
     }
 
-    public function testItDocumentsFacadesWithSeeAnnotations()
+    public function test_it_documents_facades_with_see_annotations()
     {
         $this->artisan(DocumentFacades::class, [
             'paths' => $this->fixturePath(),
@@ -39,7 +40,7 @@ class FacadesTest extends TestCase
         $this->assertStringContainsString('@method static void bar()', $contents);
     }
 
-    public function testItDoesntDocumentFacadesWhenExcluded()
+    public function test_it_doesnt_document_facades_when_excluded()
     {
         $this->artisan(DocumentFacades::class, [
             'paths' => $this->fixturePath(),
@@ -49,7 +50,20 @@ class FacadesTest extends TestCase
         $this->assertStringNotContainsString('@method', file_get_contents($this->fixturePath('FacadeWithSee.php')));
     }
 
-    public function testItDocumentsFacadesWhenIncluded()
+    public function test_it_documents_facades_with_use_see_annotations()
+    {
+        $this->artisan(DocumentFacades::class, [
+            'paths' => $this->fixturePath(),
+            '--only' => [FacadeWithUseSee::class],
+        ]);
+
+        $contents = file_get_contents($this->fixturePath('FacadeWithUseSee.php'));
+
+        $this->assertStringContainsString('@method static void foo()', $contents);
+        $this->assertStringContainsString('@method static void bar()', $contents);
+    }
+
+    public function test_it_documents_facades_when_included()
     {
         $this->artisan(DocumentFacades::class, [
             'paths' => $this->fixturePath(),
