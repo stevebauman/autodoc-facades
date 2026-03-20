@@ -134,19 +134,31 @@ exit(0);
 function resolveProxies($class)
 {
     return resolveDocSees($class)
-        ->map(function ($proxy) use ($class) {
-            if (class_exists($proxy)) {
-                return $proxy;
-            }
+        ->map(fn ($proxy) => determineFqcn($proxy, $class));
+}
 
-            $guessedFqcn = resolveClassImports($class)->get($proxy) ?? '\\'.$class->getNamespaceName().'\\'.$proxy;
+/**
+ * Determine the fully qualified class name.
+ *
+ * @param  string  $class
+ * @param  \ReflectionClass  $source
+ * @return class-string
+ */
+function determineFqcn($class, $source)
+{
+    $importedFqcn = resolveClassImports($source)->get($class);
 
-            if (class_exists($guessedFqcn)) {
-                return $guessedFqcn;
-            }
+    if ($importedFqcn && class_exists($importedFqcn)) {
+        return $importedFqcn;
+    }
 
-            return $proxy;
-        });
+    $namespacedFqcn = '\\'.$source->getNamespaceName().'\\'.$class;
+
+    if (class_exists($namespacedFqcn)) {
+        return $namespacedFqcn;
+    }
+
+    return $class;
 }
 
 /**
@@ -302,9 +314,9 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
                 return 'int';
             }
 
-            $guessedFqcn = resolveClassImports($method->getDeclaringClass())->get($typeNode->name) ?? '\\'.$method->getDeclaringClass()->getNamespaceName().'\\'.$typeNode->name;
+            $determinedFqcn = determineFqcn($typeNode->name, $method->getDeclaringClass());
 
-            foreach ([$typeNode->name, $guessedFqcn] as $name) {
+            foreach ([$typeNode->name, $determinedFqcn] as $name) {
                 if (class_exists($name)) {
                     return Str::start((string) $name, '\\');
                 }
@@ -537,6 +549,7 @@ function resolveDocMixins($class, $encoutered = new Collection)
     $encoutered[] = $class->getName();
 
     return resolveDocTags($class->getDocComment() ?: '', '@mixin ')
+        ->map(fn ($mixin) => determineFqcn($mixin, $class))
         ->map(fn ($mixin) => new ReflectionClass($mixin))
         ->flatMap(fn ($mixin) => [$mixin, ...resolveDocMixins($mixin, $encoutered)]);
 }
