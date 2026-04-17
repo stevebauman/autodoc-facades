@@ -148,13 +148,13 @@ function determineFqcn($class, $source)
 {
     $importedFqcn = resolveClassImports($source)->get($class);
 
-    if ($importedFqcn && (class_exists($importedFqcn) || interface_exists($importedFqcn) || enum_exists($importedFqcn))) {
+    if ($importedFqcn && (class_exists($importedFqcn) || interface_exists($importedFqcn))) {
         return $importedFqcn;
     }
 
     $namespacedFqcn = '\\'.$source->getNamespaceName().'\\'.$class;
 
-    if (class_exists($namespacedFqcn) || interface_exists($namespacedFqcn) || enum_exists($namespacedFqcn)) {
+    if (class_exists($namespacedFqcn) || interface_exists($namespacedFqcn)) {
         return $namespacedFqcn;
     }
 
@@ -278,17 +278,7 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
         }
 
         if ($typeNode instanceof GenericTypeNode) {
-            $baseType = resolveDocblockTypes($method, $typeNode->type, $depth + 1);
-
-            $genericArgs = collect($typeNode->genericTypes)
-                ->map(fn ($node) => resolveDocblockTypes($method, $node, $depth + 1))
-                ->filter();
-
-            if ($genericArgs->isEmpty()) {
-                return $baseType;
-            }
-
-            return $baseType.'<'.$genericArgs->implode(', ').'>';
+            return resolveDocblockTypes($method, $typeNode->type, $depth + 1);
         }
 
         if ($typeNode instanceof ThisTypeNode) {
@@ -327,7 +317,7 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
             $determinedFqcn = determineFqcn($typeNode->name, $method->getDeclaringClass());
 
             foreach ([$typeNode->name, $determinedFqcn] as $name) {
-                if (class_exists($name) || interface_exists($name) || enum_exists($name)) {
+                if (class_exists($name) || interface_exists($name)) {
                     return Str::start((string) $name, '\\');
                 }
 
@@ -454,7 +444,7 @@ function isBuiltIn($type)
     return in_array($type, [
         'null', 'bool', 'int', 'float', 'string', 'array', 'object',
         'resource', 'never', 'void', 'mixed', 'iterable', 'self', 'static',
-        'parent', 'true', 'false', 'callable', 'array-key',
+        'parent', 'true', 'false', 'callable',
     ]);
 }
 
