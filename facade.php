@@ -326,7 +326,7 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
                 }
             }
 
-            return handleUnknownIdentifierType($method, $typeNode);
+            return handleUnknownIdentifierType($method, $typeNode, $depth);
         }
 
         if ($typeNode instanceof ConditionalTypeNode) {
@@ -415,15 +415,21 @@ function resolveDocblockTypes($method, $typeNode, $depth = 1)
  *
  * @param  \ReflectionMethodDecorator  $method
  * @param  \PHPStan\PhpDocParser\Ast\Type\IdentifierTypeNode  $typeNode
+ * @param  int  $depth
  * @return string
  */
-function handleUnknownIdentifierType($method, $typeNode)
+function handleUnknownIdentifierType($method, $typeNode, $depth = 1)
 {
     $docblock = parseDocblock($method->getDocComment());
     $boundTemplateType = collect($docblock->getTemplateTagValues())->firstWhere('name', $typeNode->name)?->bound;
 
     if ($boundTemplateType !== null) {
-        $resolvedTemplateType = resolveDocblockTypes($method, $boundTemplateType);
+        // Forward depth so a union-typed bound (e.g. `TDefault of TEnum|null`) isn't
+        // re-wrapped in `(...)` at the outer depth==1 marker. The character-wise
+        // trim('()') in resolveReturnDocType / resolveDocParamType would otherwise
+        // strip both inner and outer parens unevenly, emitting an unbalanced tag
+        // like `\BackedEnum|(\BackedEnum|null`.
+        $resolvedTemplateType = resolveDocblockTypes($method, $boundTemplateType, $depth);
 
         if ($resolvedTemplateType !== null) {
             return $resolvedTemplateType;
